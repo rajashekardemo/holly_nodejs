@@ -51,10 +51,6 @@ router.post('/follower', follower)
 
 router.get('/artistname/:artist',artistSongs)
 
-// const { searchSongs } = require('./your-controller-file'); // Replace with the actual path to your controller file
-
-// Define a route for song search
-// router.get('/search/:category', searchSongs);
 
 router.get('/category/:category',categorySongs)
 
