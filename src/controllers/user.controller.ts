@@ -124,113 +124,6 @@ export const confirmOTP = async (req: P['rq'], res: P['rs'], next: P['n']) => {
  * @param next
  * @returns
  */
-// export const signIn = async (req: P['rq'], res: P['rs'], next: P['n']) => {
-//   const { phone, password } = req.body;
-//   if (!phone || !password) {
-//     return next(new Error('Email and password Required '));
-//   }
-//   const user = await User.findOne({ phone }).select('+password');
-//   console.log({ user });
-//   if (!user) {
-//     return next(new Error('Email and password not matched '));
-//   }
-//   const isCorrectPassword = await user.checkValidPassword(password);
-//   if (!isCorrectPassword) {
-//     return next(new Error('Not Registered User'));
-//   }
-//   await cookieToken(user, res);
-  
-//   // Retrieve recently played songs for the user
-//   const userId = user._id; 
-//   const userRecentlyPlayed = await Play.find({ userId }).sort({ timestamp: -1 });
-//   res.status(200).json({ user, recentlyPlayed: userRecentlyPlayed });
-
-// };
-
-// export const signIn = async (req: P['rq'], res: P['rs'], next: P['n']) => {
-//   try {
-//     const { phone, password } = req.body;
-//     if (!phone || !password) {
-//       throw new Error('Email and password Required');
-//     }
-//     if(phone.length <10) {
-//       res.status(401).json("Invalid Phone Number");
-//     }
-//     const user = await User.findOne({ phone }).select('+password');
-//     console.log({ user });
-//     if (!user) {
-//       res.status(401).json("user not found");
-//     }
-//     const isCorrectPassword = await user.checkValidPassword(password);
-//     if (!isCorrectPassword) {
-//       res.json("Invalid Password")
-//     }
-//     await cookieToken(user,res);
-
-    
-//     // Retrieve recently played songs for the user
-//     const userId = user._id;
-//     const userRecentlyPlayed = await Play.find({ userId }).sort({ timestamp: -1 });
-
-//     // Respond with user information and recently played songs
-//     res.status(200).json({ user, recentlyPlayed: userRecentlyPlayed });
-//   } catch (error) {
-//     // Handle errors here and pass them to the error handler middleware (next)
-//     next(error);
-//   }
-// };
-
-// export const signIn = async (req: P['rq'], res: P['rs'], next: P['n']) => {
-//   try {
-//     const { phone, password } = req.body;
-//     if (!phone || !password) {
-//       throw new Error('Email and password Required');
-//     }
-//     if (phone.length < 10) {
-//       return res.status(401).json("Invalid Phone Number");
-//     }
-//     const user = await User.findOne({ phone }).select('+password');
-//     // console.log({ user.email, user.password });
-//     console.log("******")
-//     console.log( user._id );
-//     // console.log( {user} );
-//     console.log("******")
-//     if (!user) {
-//       return res.status(401).json("User not found");
-//     }
-//     const isCorrectPassword = await user.checkValidPassword(password);
-//     if (!isCorrectPassword) {
-//       return res.status(401).json("Invalid Password");
-//     }
-//     await cookieToken(user,res);
-
-//     // Retrieve recently played songs for the user
-//     const userId = user._id;
-//     const userRecentlyPlayed = await Play.find({ userId }).sort({ timestamp: -1 });
-
-//     // const userrecently={userRecentlyPlayed, user}
-//     console.log("******")
-//     // console.log(userRecentlyPlayed)
-//     const keys = Object.keys(userRecentlyPlayed);
-//     for (const key of keys) {
-//       console.log(`${userRecentlyPlayed[key]}==="song"`);
-//       // console.log(`${key}==="song"`);
-//     }
-//     // console.log(userRecentlyPlayed.song)
-//     // const filenames = userRecentlyPlayed.map((song) => song.filename);
-
-//     console.log("******")
-    
-//     // Respond with user userRecentlyPlayedgs
-//     // res.status(200).json({userRecentlyPlayedntlyPlayed });
-//     // res.status(200)
-//     res.status(200).json({ user, recentlyPlayed: userRecentlyPlayed });
-//   } catch (error) {
-//     // Handle errors here and pass them to the error handler middleware (next)
-//     next(error);
-//     // res.status(500).json(error)
-//   }
-// };
 
 export const signIn = async (req: P['rq'], res: P['rs']) => {
   try {
@@ -269,11 +162,6 @@ export const signIn = async (req: P['rq'], res: P['rs']) => {
     return res.status(500).json("Internal Server Error");
   }
 };
-
-
-
-
-
 
 
 export const play = async (req, res) => {
@@ -324,33 +212,6 @@ export const logOut = async (req: P['rq'], res: P['rs'], next: P['n']) => {
     message: 'Logout User Successfully',
   });
 };
-/**
- * Forget Password
- */
-// export const forgetPassword = async (
-//   req: P['rq'],
-//   res: P['rs'],
-//   next: P['n']
-// ) => {
-//   const { phone } = req.body;
-//   if (!phone) {
-//     return next(new Error('Email Required'));
-//   }
-//   const user = await User.findOne({ phone });
-//   console.log({ user });
-//   if (!user) {
-//     return next(new Error('Email and password not matched '));
-//   }
-//   const token = await user.getForgetPasswordToken();
-//   await user.save({ validateBeforeSave: false });
-//   res.status(200).json({
-//     success: true,
-//     message: 'Reset Password Token Send to Your Email',
-//     token,
-//   });
-// };
-
-
 
 
 export const forgetPassword = async (req: P['rq'], res: P['rs'], next: P['n']) => {
@@ -374,64 +235,6 @@ export const forgetPassword = async (req: P['rq'], res: P['rs'], next: P['n']) =
     res.status(500).json(error);
   }
 };
-
-/**
- * Reset Password
- */
-
-// export const resetPassword = async (
-//   req: P['rq'],
-//   res: P['rs'],
-//   next: P['n']
-// ) => {
-//   const { password, token } = req.body;
-
-//   if (!password) {
-//     return next(new Error('Password Required'));
-//   }
-//   if (!token) {
-//     return next(new Error('Token Required'));
-//   }
-
-//   const user = await User.findOne({
-//     forgetPasswordToken: token,
-//   });
-
-//   if (!user) {
-//     return next(new Error('Invalid Token'));
-//   }
-//   user.password = password;
-//   user.forgetPasswordToken = undefined;
-//   user.forgetPasswordExpiry = undefined;
-//   await user.save();
-//   await cookieToken(user, res, {
-//     message: 'Password Reset Successfully',
-//   });
-// };
-
-
-// export const resetPassword = async (req: P['rq'], res: P['rs'], next: P['n']) => {
-//   const { newpassword,phone, otp } = req.body;
-//   if (!newpassword || !otp ||! phone) {
-//     return next(new CoffeeError('OTP is required', 400));
-//   }
-//   try {
-//     const india = toIND(phone);
-//     const response = await verifyOTP(india, otp);
-//     if (response.status === UserStatus.APPROVED) {
-//       const user = await User.findOneAndUpdate(
-//         { phone },
-//         // { status: UserStatus.APPROVED },
-//         { password: newpassword  }
-//       );
-
-//       user.save();
-//       res.status(200).json(user);   
-//     }
-//   } catch (error) {
-//     res.status(500).json(error);
-//   }
-// };
 
 
 export const resetPassword = async (req: P['rq'], res: P['rs'], next: P['n']) => {

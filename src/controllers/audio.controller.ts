@@ -1,7 +1,7 @@
 import { bucket } from "@/databases/index";
 import mongoose from "mongoose";
 import Like from "@/models/like.model";
-import { AudioUrlBase } from "@/config/index"
+import { AudioUrlBase } from "@/config/index";
 import Audio, { audio } from "@/models/audio.model";
 import Play from "@/models/play.model";
 import Fav from "@/models/fav.model";
@@ -12,24 +12,28 @@ import { response } from "express";
 
 export const success = async (req, res) => {
   const { songname, title, artist, language, category, lyrics } = req.body;
-  const file = AudioUrlBase + "audio/songByNamePlay/" + req.files['file'][0].filename; // Assuming 'file' is the name attribute in your form
-  const image = AudioUrlBase + "audio/songByNamePlay/" + req.files['image'][0].filename;
+  const file =
+    AudioUrlBase + "audio/songByNamePlay/" + req.files["file"][0].filename; // Assuming 'file' is the name attribute in your form
+  const image =
+    AudioUrlBase + "audio/songByNamePlay/" + req.files["image"][0].filename;
   console.log(req.files); // Array
   try {
     const audio = Audio.create({
-      songname, title, artist, language, category, file, image, lyrics
+      songname,
+      title,
+      artist,
+      language,
+      category,
+      file,
+      image,
+      lyrics,
     });
     (await audio).save();
     return res.status(200).json("Details uploaded successfully");
-
   } catch (error) {
     return res.status(400).json({ error: "Details not uploaded." });
   }
 };
-
-
-
-
 
 //  Get Id By Song With Play Song
 export const songByIDPlay = async (req, res) => {
@@ -48,8 +52,6 @@ export const songByIDPlay = async (req, res) => {
     res.status(500).json({ error: "An error occurred while fetching songs." });
   }
 };
-
-
 
 // Getting Random 5 Songs
 // export const randomsongs = async (req, res) => {
@@ -71,11 +73,10 @@ export const songByIDPlay = async (req, res) => {
 //   return shuffled.slice(0, count);
 // }
 
-
 export const randomsongs = async (req, res) => {
   try {
     const songs = await Audio.find({});
-    console.log(songs)
+    console.log(songs);
     const random = getRandomItems(songs, 5);
 
     if (random.length > 0) {
@@ -87,9 +88,9 @@ export const randomsongs = async (req, res) => {
         category: item.category,
         lyrics: item.lyrics,
         song: item.file,
-        image: item.image
+        image: item.image,
       }));
-      console.log(responseArray)
+      console.log(responseArray);
       res.status(200).json(responseArray);
     } else {
       res.status(200).json({ message: "No songs found." });
@@ -108,16 +109,10 @@ function getRandomItems(array, count) {
   return shuffled.slice(0, count);
 }
 
-
-
-
-
 // Getting Recently Played Songs
 export const getrecentlyplayedsongs = async (req, res) => {
   try {
-    const songs = await Play
-      .find({})
-      .sort({ "playedAt": -1 });
+    const songs = await Play.find({}).sort({ playedAt: -1 });
     res.status(200).json(songs);
   } catch (error) {
     console.log(error);
@@ -131,11 +126,17 @@ export const getrecentlyplayedsongs = async (req, res) => {
 export const playSong = async (req, res) => {
   try {
     const { userId, songId } = req.body;
-    console.log(userId);
+
     const timestamp = new Date();
-    const song = await Audio.findById(songId)
-    const newSong = new Play({ userId, songId: song.file, image: song.image, timestamp });
+    const song = await Audio.findById(songId);
+    const newSong = new Play({
+      userId,
+      songId: song.file,
+      image: song.image,
+      timestamp,
+    });
     await newSong.save();
+    console.log(newSong);
     res.status(200).json({ message: "Song played successfully" });
   } catch (error) {
     res.status(500).json({ error: "Error logging the song" });
@@ -149,19 +150,21 @@ export const lyricById = async (req, res) => {
     console.log(id);
     // Find the song by ID in the database
     const song = await Audio.findById(id); // Use songId as the argument
-    console.log('Found song:', song);
+    console.log("Found song:", song);
 
     if (!song) {
-      return res.status(500).json({ message: 'Song not found' });
+      return res.status(500).json({ message: "Song not found" });
     }
 
     // If the song has lyrics stored in the database, return them
     if (song.lyrics) {
-      return res.status(200).json({ name: song.file, img: song.image, lyrics: song.lyrics });
+      return res
+        .status(200)
+        .json({ name: song.file, img: song.image, lyrics: song.lyrics });
     }
   } catch (error) {
-    console.error('Error:', error.message);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error("Error:", error.message);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -171,11 +174,9 @@ export const songByName = async (req, res) => {
     const name = req.params.filename;
     console.log(name);
 
-    const songs = await bucket
-      .find({
-        filename: name,
-      })
-      .toArray();
+    const songs = await Audio.find({
+      songname: name,
+    });
     if (songs.length === 0) {
       // Handle the case when no song is found with the provided _id
       return res.status(404).json({ error: "Song not found." });
@@ -188,7 +189,6 @@ export const songByName = async (req, res) => {
   }
 };
 
-
 // export const getAllSongsPlay = async (req, res) => {
 //   try {
 //     const songs = await Audio.find({});
@@ -200,7 +200,6 @@ export const songByName = async (req, res) => {
 //       .json({ error: "An error occurred while fetching the songs." });
 //   }
 // };
-
 
 // export const getAllSongsPlay = async (req, res) => {
 //   try {
@@ -223,7 +222,7 @@ export const songByName = async (req, res) => {
 
 export const getAllSongsPlay = async (req, res) => {
   try {
-    const perPage = 3; // Number of songs per page
+    const perPage = 1; // Number of songs per page
     const page = parseInt(req.query.page, 3) || 1; // Current page, default to 1
 
     // Query the database to retrieve all songs
@@ -241,11 +240,11 @@ export const getAllSongsPlay = async (req, res) => {
     res.status(200).json({ songs, totalPages, currentPage: page });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "An error occurred while fetching the songs." });
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching the songs." });
   }
 };
-
-
 
 export const likesongs = async (req, res) => {
   try {
@@ -255,7 +254,9 @@ export const likesongs = async (req, res) => {
     const userExists = await User.exists({ _id: userId });
 
     if (!userExists) {
-      return res.status(401).json({ message: "Please register to like a song." });
+      return res
+        .status(401)
+        .json({ message: "Please register to like a song." });
     }
 
     // Find the Like document for the given songId
@@ -320,7 +321,6 @@ export const songByNamePlay = async (req, res) => {
 
     const files = await bucket.find({ filename }).toArray();
 
-
     console.log(files);
     if (!files.length) {
       res.send("ERROR");
@@ -340,45 +340,47 @@ export const songByNamePlay = async (req, res) => {
   }
 };
 
+
+
 export const songByWord = async (req, res) => {
   try {
-    const name = req.params.filename.toLowerCase();
-    const songs = await bucket.find({}).toArray();
-    const filenames = songs.map((song) => song.filename.toLowerCase());
-    console.log(filenames);
+    const name = req.params.filename;
 
-    let foundFilenames = [];
-    for (const filename of filenames) {
-      if (filename.includes(name)) {
-        foundFilenames.push(filename);
+    // Use a more precise query to find songs containing the word in the songname field
+    const songs = await Audio.find({
+      songname: { $regex: name, $options: "i" }, // Case-insensitive search
+    });
+
+    if (songs.length > 0) {
+      const songDetails = songs.map((song) => ({
+        songname: song.songname,
+        title: song.title,
+        artist: song.artist,
+        language: song.language,
+        category: song.category,
+        file: song.file,
+        image: song.image,
+        lyrics: song.lyrics
+      }));
+
+      const filteredSongs = songDetails.filter((song) =>
+        song.songname.includes(name)
+      );
+
+      if (filteredSongs.length > 0) {
+        res.status(200).json(filteredSongs);
+      } else {
+        res.status(200).json({ message: `${name} Song not found.` });
       }
-    }
-    if (foundFilenames.length > 0) {
-      res.status(200).json(foundFilenames);
     } else {
-      res.status(200).json({ message: `${name} Song not found.` });
+      res.status(404).json({ message: `${name} Song not found.` });
     }
   } catch (error) {
+    console.error(error); // Log the error for debugging
     res.status(500).json({ error: "An error occurred while fetching songs." });
   }
 };
 
-
-
-// Perticular User with fav Song
-// export const fav = async (req, res) => {
-//   try {
-//     const { userId, songId } = req.body;
-//     // Log the fav played song
-//     const timestamp = new Date();
-//     const song= await Audio.findById(songId)
-//     const newSong = new Fav({ userId, songId:song.file, image:song.image, timestamp });
-//     await newSong.save();
-//     res.status(200).json({ message: "added to fav Song" });
-//   } catch (error) {
-//     res.status(500).json({ error: "Error logging the song" });
-//   }
-// };
 
 export const fav = async (req, res) => {
   try {
@@ -388,7 +390,9 @@ export const fav = async (req, res) => {
     const existingFavorite = await Fav.findOne({ userId, songId });
 
     if (existingFavorite) {
-      return res.status(200).json({ message: "Song already exists in favorites" });
+      return res
+        .status(200)
+        .json({ message: "Song already exists in favorites" });
     }
 
     // Log the fav played song
@@ -403,7 +407,6 @@ export const fav = async (req, res) => {
   }
 };
 
-
 // Retrieve a user's fav played songs
 export const favPlayed = async (req, res) => {
   try {
@@ -417,110 +420,33 @@ export const favPlayed = async (req, res) => {
   }
 };
 
-// export const addplaylist = async (req, res) => {
-//   try {
-//     const { userId, playlist1, playlist2, playlist3 } = req.body;
-//     const timestamp = new Date();
-
-//     // Check if a user with the given userId already exists in the database
-//     const existingUser = await Playlist.findOne({ userId });
-
-//     if (existingUser) {
-//       // Check if the songs already exist in the playlists
-//       const songAlreadyInPlaylists = checkSongsExist(existingUser, [playlist1, playlist2, playlist3]);
-
-//       if (songAlreadyInPlaylists) {
-//         return res.status(400).json({ error: "One or more songs already exist in the playlists." });
-//       }
-
-//       // Append the new songs to their existing playlists
-//       existingUser.playlist1 = appendSongs(existingUser.playlist1, playlist1);
-//       existingUser.playlist2 = appendSongs(existingUser.playlist2, playlist2);
-//       existingUser.playlist3 = appendSongs(existingUser.playlist3, playlist3);
-//       existingUser.timestamp = timestamp;
-//       await existingUser.save();
-//       res.status(200).json({ message: "Updated playlists." });
-//     } else {
-//       // If the user doesn't exist, create a new record
-//       const songsExist = await checkSongsExist(existingUser, [playlist1, playlist2, playlist3]);
-
-//       if (songsExist) {
-//         return res.status(400).json({ error: "One or more songs already exist in the playlists." });
-//       }
-
-//       const newSong = new Playlist({
-//         userId,
-//         playlist1,
-//         playlist2,
-//         playlist3,
-//         timestamp,
-//       });
-//       await newSong.save();
-//       res.status(200).json({ message: "Added to playlists." });
-//     }
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Error logging the song." });
-//   }
-// };
-
-// // Helper function to check if songs exist in the playlists
-// const checkSongsExist = (user, songs) => {
-//   for (const song of songs) {
-//     if (
-//       user.playlist1.includes(song) ||
-//       user.playlist2.includes(song) ||
-//       user.playlist3.includes(song)
-//     ) {
-//       return true;
-//     }
-//   }
-//   return false;
-// };
-
-// // Helper function to append new songs to an existing playlist
-// const appendSongs = (currentPlaylist, newSongs) => {
-//   if (Array.isArray(currentPlaylist) && Array.isArray(newSongs)) {
-//     currentPlaylist.push(...newSongs);
-//   }
-//   return currentPlaylist;
-// };
-
-
-
-// Retrieve a user's playlist songs
-// export const getallplaylist = async (req, res) => {
-//   try {
-//     const { userId } = req.params;
-//     const userplaylist = await Playlist
-//       .find({ userId })
-//       .sort({ timestamp: -1 });
-//       const link = `http://localhost:8080/songsplay/${userplaylist}`;
-//     // console.log(userplaylist);
-
-//     res.status(200).json( link);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Error playlist added songs" });
-//   }
-// };
-
-
 export const getallplaylist = async (req, res) => {
   try {
     const { userId } = req.params;
-    const userplaylists = await Playlist
-      .find({ userId })
-      .sort({ timestamp: -1 });
+    const userplaylists = await Playlist.find({ userId }).sort({
+      timestamp: -1,
+    });
 
-    const playlistsWithLinks = userplaylists.map(playlist => {
-      const filteredPlaylist1 = playlist.playlist1.filter(song => song !== null);
-      const filteredPlaylist2 = playlist.playlist2.filter(song => song !== null);
-      const filteredPlaylist3 = playlist.playlist3.filter(song => song !== null);
+    const playlistsWithLinks = userplaylists.map((playlist) => {
+      const filteredPlaylist1 = playlist.playlist1.filter(
+        (song) => song !== null
+      );
+      const filteredPlaylist2 = playlist.playlist2.filter(
+        (song) => song !== null
+      );
+      const filteredPlaylist3 = playlist.playlist3.filter(
+        (song) => song !== null
+      );
 
-      const links1 = filteredPlaylist1.map(song => `http://localhost:8080/songsplay/${song}`);
-      const links2 = filteredPlaylist2.map(song => `http://localhost:8080/songsplay/${song}`);
-      const links3 = filteredPlaylist3.map(song => `http://localhost:8080/songsplay/${song}`);
+      const links1 = filteredPlaylist1.map(
+        (song) => `http://localhost:8080/songsplay/${song}`
+      );
+      const links2 = filteredPlaylist2.map(
+        (song) => `http://localhost:8080/songsplay/${song}`
+      );
+      const links3 = filteredPlaylist3.map(
+        (song) => `http://localhost:8080/songsplay/${song}`
+      );
 
       return {
         playlist1: links1,
@@ -536,15 +462,12 @@ export const getallplaylist = async (req, res) => {
   }
 };
 
-
-
-
 export const follower = async (req, res) => {
   try {
     const { userId, artistId } = req.body;
 
     const existingArtist = await Artist.findById(artistId);
-    const existingUser = await User.findById(userId);  //print username not userId
+    const existingUser = await User.findById(userId); //print username not userId
 
     if (!existingUser) {
       res.status(404).json("No User Found");
@@ -567,7 +490,6 @@ export const follower = async (req, res) => {
   }
 };
 
-
 //Artist by name
 
 export const artistSongs = async (req, res) => {
@@ -582,30 +504,10 @@ export const artistSongs = async (req, res) => {
       const songArtist = (song.artist || "").toLowerCase();
       return songArtist.includes(artistName);
     });
-    console.log(artistSongs)
+    console.log(artistSongs);
 
     if (artistSongs.length > 0) {
-      // Create an array of song filenames
-      const songFilenames = artistSongs.map((song) => song.artist);
-      const images = artistSongs.map((song) => song.image);
-
-      const songslinks = [];
-      const imagelinks = [];
-
-      for (const filename of songFilenames) {
-        songslinks.push({
-          link: `http://localhost:8080/songsplay/${filename}`,
-          links: `http://localhost:8080/songsplay/${images}`,
-        });
-      }
-
-      // Create the response object
-      const link = {
-        artistName: artistName,
-        songs: songslinks,
-      };
-
-      res.status(200).json(link);
+      res.status(200).json(artistSongs);
     } else {
       res.status(200).json({ message: `${artistName} songs not found.` });
     }
@@ -615,19 +517,22 @@ export const artistSongs = async (req, res) => {
   }
 };
 
-
 export const categorySongs = async (req, res) => {
   try {
     const category = req.params.category.toLowerCase();
 
     // Fetch songs that match the specified category
-    const songs = await Audio.find({ category: category });
+    const songs = await Audio.find({});
+
+     // Filter songs by the  category
+     const categorySongs = songs.filter((song) => {
+      const songCategory = (song.category || "").toLowerCase();
+      return songCategory.includes(category);
+    });
+    console.log(categorySongs);
 
     if (songs.length > 0) {
-      // Extract filenames from the matching songs
-      const songFilenames = songs.map((song) => song.file);
-      
-      res.status(200).json(songFilenames);
+      res.status(200).json(categorySongs);
     } else {
       res.status(200).json({ message: `${category} songs not found.` });
     }
@@ -637,7 +542,6 @@ export const categorySongs = async (req, res) => {
   }
 };
 
-
 // // Helper function to append new songs to an existing playlist
 const appendSongs = (currentPlaylist, newSongs) => {
   if (Array.isArray(currentPlaylist) && Array.isArray(newSongs)) {
@@ -645,7 +549,6 @@ const appendSongs = (currentPlaylist, newSongs) => {
   }
   return currentPlaylist;
 };
-
 
 export const addplaylist = async (req, res) => {
   try {
@@ -665,21 +568,27 @@ export const addplaylist = async (req, res) => {
       // Check if each song exists in the corresponding playlist and limit the size
       if (playlist1) {
         if (songExistsInPlaylist(existingUser.playlist1, playlist1)) {
-          return res.status(400).json({ message: "Song already exists in playlist1." });
+          return res
+            .status(400)
+            .json({ message: "Song already exists in playlist1." });
         }
         existingUser.playlist1.push(playlist1);
       }
 
       if (playlist2) {
         if (songExistsInPlaylist(existingUser.playlist2, playlist2)) {
-          return res.status(400).json({ message: "Song already exists in playlist2." });
+          return res
+            .status(400)
+            .json({ message: "Song already exists in playlist2." });
         }
         existingUser.playlist2.push(playlist2);
       }
 
       if (playlist3) {
         if (songExistsInPlaylist(existingUser.playlist3, playlist3)) {
-          return res.status(400).json({ message: "Song already exists in playlist3." });
+          return res
+            .status(400)
+            .json({ message: "Song already exists in playlist3." });
         }
         existingUser.playlist3.push(playlist3);
       }
@@ -711,3 +620,50 @@ export const addplaylist = async (req, res) => {
 };
 
 
+
+
+
+export const searchSongs = async (req, res) => {
+  const name = req.params.search;
+  try {
+    const artistName = name.artist; // Normalize input artist name
+
+    // Fetch songs from the database
+    const Asongs = await Audio.find({});
+
+    // Filter songs by the artist's name
+    const artistSongs = Asongs.filter((song) => {
+      const songArtist = (song.artist || "").toLowerCase();
+      return songArtist.includes(artistName);
+    });
+    console.log(artistSongs);
+    
+    // Use a more precise query to find songs containing the word in the songname field
+    const songs = await Audio.find({
+      songname: { $regex: name, $options: "i" }, // Case-insensitive search
+    });
+
+    if (songs.length > 0) {
+      const songDetails = songs.map((song) => ({
+        songname: song.songname,
+        title: song.title,
+        artist: song.artist,
+        language: song.language,
+        category: song.category,
+        file: song.file,
+        image: song.image,
+        lyrics: song.lyrics
+      }));
+
+      const filteredSongs = songDetails.filter((song) =>
+        song.songname.includes(name)
+      );
+
+    const result = {artistSongs, filteredSongs}
+    res.status(200).json(result);
+    }
+     } catch (error) {
+    console.error(error); // Log the error for debugging
+    res.status(500).json({ error: 'An error occurred while fetching songs.' });
+  }
+};

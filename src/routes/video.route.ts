@@ -9,4 +9,4 @@ const uploadvideo = multer({ storage });
 
 router.post("/uploadvideo", uploadvideo.single("file") ,uploadVideo);
 
-router.get('/videoplay/:id',videoByIDPlay)
+router.get('/videoplay/:id',videoByIDPlay)  
