@@ -25,19 +25,16 @@ router.post('/playsong', playSong)
 router.get('/song/:filename', songByName)
 
 router.get('/songword/:filename', songByWord)
-//7)get completed
+
 router.get('/recentlyplayedsongs', getrecentlyplayedsongs)
-//8)get completed
+
 router.get('/songByNamePlay/:filename', songByNamePlay)
-//9)get completed
+
 router.get('/songsplay/:id', songByIDPlay)
 
 router.get('/lyric/:id', lyricById)
 
-//10)get completed
 router.get('/getall', getAllSongsPlay)
-// 11)get completed
-
 
 router.post('/fav', fav)
 

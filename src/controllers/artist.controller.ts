@@ -87,6 +87,7 @@ export const signUp = async (req: P['rq'], res: P['rs'], next: P['n']) => {
 
     });
     await cookieToken<typeof artist>(artist, res);
+    res.status(200).json(artist);
   } catch (error) {
     res.status(500).json(error);
   }
@@ -165,20 +166,6 @@ export const play = async (req, res) => {
   }
 };
 
-// Retrieve a artist's recently played songs
-// export const recentlyPlayed = async (req, res) => {
-//   try {
-//     const { artistId } = req.params;
-
-//     // Retrieve recently played songs for the artist
-//     const artistRecentlyPlayed = await Play.find({ artistId }).sort({ timestamp: -1 });
-
-//     res.status(200).json({ artistRecentlyPlayed });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Error retrieving recently played songs' });
-//   }
-// };
 
 /**
  * Log Out artist
@@ -206,12 +193,12 @@ export const forgetPassword = async (
 ) => {
   const { phone } = req.body;
   if (!phone) {
-    return next(new Error('Email Required'));
+    return next(new Error('Phone Number Required'));
   }
   const artist = await Artist.findOne({ phone });
   console.log({ artist });
   if (!artist) {
-    return next(new Error('Email and password not matched '));
+    return next(new Error('Artist not Found '));
   }
   const token = await artist.getForgetPasswordToken();
   await artist.save({ validateBeforeSave: false });

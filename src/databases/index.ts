@@ -17,16 +17,12 @@ const connection = async (uri: string, options?: mongoose.ConnectOptions) => {
   try {
     await mongoose.connect(uri, options);
     logger('success','[monogo]')(`Connected To Database`);
-    // logger('error','[monogo]')(`Connected To Database`);
-    // logger('success',)('Red')
-    // logger('warning',)('Orange')
-    // logger('error',)('Red')
   } catch (error) {
     logger('error','[monogo]')(error);
   }
 };
 
 export { connection,client,bucket, videoBucket };
-// const bucket = new mongo.GridFSBucket(db, { bucketName: "songs" });
+
 
 export default connection;

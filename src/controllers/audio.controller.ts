@@ -398,7 +398,17 @@ export const fav = async (req, res) => {
     // Log the fav played song
     const timestamp = new Date();
     const song = await Audio.findById(songId);
-    const newSong = new Fav({ userId, songId, image: song.image, timestamp });
+    const newSong = new Fav({ userId, songId,
+      songname: song.songname,
+      title: song.title,
+      artist: song.artist,
+      language: song.language,
+      category: song.category,
+      file: song.file,
+      image: song.image,
+      lyrics: song.lyrics,
+      timestamp
+    });
     await newSong.save();
 
     return res.status(200).json({ message: "Added to favorites" });
