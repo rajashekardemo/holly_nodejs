@@ -3,18 +3,17 @@ import User from '@/models/users/user.model';
 import { sendSMS, verifyOTP } from '@/services/twilio.services';
 import { UserStatus } from '@/typings/enums';
 import cookieToken from '@/utils/cookie-token';
-import CoffeeError from '@/utils/custom-error';
 import toIND from '@/utils/to-ind';
 import { NextFunction, Request, Response } from 'express';
 import Play from '@/models/play.model';
-import Audio from '@/models/audio.model';
+
 
 type P = {
   rq: Request;
   rs: Response;
   n: NextFunction;
 };
-let userRecentlyPlayed=undefined;
+
 /**
  * Find All Users
  * @param req
@@ -68,7 +67,7 @@ export const deleteUserById = async (req: P['rq'], res: P['rs']) => {
 export const signUp = async (req: P['rq'], res: P['rs'], next: P['n']) => {
   const { name, phone, password } = req.body;
   if (!name || !phone || !password) {
-    return next(new CoffeeError('Required', 400));
+    return res.json('Required');
   }
   try {
     /**
@@ -98,7 +97,7 @@ export const signUp = async (req: P['rq'], res: P['rs'], next: P['n']) => {
 export const confirmOTP = async (req: P['rq'], res: P['rs'], next: P['n']) => {
   const { phone, otp } = req.body;
   if (!phone || !otp) {
-    return next(new CoffeeError('OTP is required', 400));
+    return res.json('OTP is required');
   }
   try {
     const india = toIND(phone);
@@ -164,37 +163,7 @@ export const signIn = async (req: P['rq'], res: P['rs']) => {
 };
 
 
-export const play = async (req, res) => {
-  try {
-    const { userId, songId } = req.body;
-    console.log(userId);
-    const timestamp = new Date();
-    const song= await Audio.findById(songId)
-    const newSong = new Play({ userId, songId:song.file, image:song.image, timestamp });
-    await newSong.save();
-    res.status(200).json({ message: "Song played successfully" });
-  } catch (error) {
-    res.status(500).json({ error: "Error logging the song" });
-  }
-};
 
-// Retrieve a user's recently played songs
-export const recentlyPlayed = async (req, res) => {
-  try {
-    const { userId } = req.params;
-
-    // Retrieve recently played songs for the user
-  //  const userRecentlyPlayed = await Play.find({ userId }).sort({ timestamp: -1 });
-
-  userRecentlyPlayed = await Play.find({ userId }).sort({ timestamp: -1 });
-
-
-    res.status(200).json({ userRecentlyPlayed });
-  } catch (error) {
-    console.error(error); 
-    res.status(500).json({ error: 'Error retrieving recently played songs' });
-  }
-};
 
 /**
  * Log Out User
@@ -217,11 +186,11 @@ export const logOut = async (req: P['rq'], res: P['rs'], next: P['n']) => {
 export const forgetPassword = async (req: P['rq'], res: P['rs'], next: P['n']) => {
   const { phone } = req.body;
   if (!phone ) {
-    return next(new CoffeeError('mobile number Required', 400));
+    return res.json('mobile number Required');
   }
   const user = await User.findOne({ phone });
   if(!user) {
-    // return next(new CoffeeError('User not found', 500));
+    // return res.json('User not found', 500));
     res.status(500).json('User not found')
   }
   try {
@@ -240,13 +209,13 @@ export const forgetPassword = async (req: P['rq'], res: P['rs'], next: P['n']) =
 export const resetPassword = async (req: P['rq'], res: P['rs'], next: P['n']) => {
   const { newpassword, phone, otp } = req.body;
   if (!newpassword || !otp || !phone) {
-    return next(new CoffeeError('OTP is required', 400));
+    return res.json('OTP is required');
   }
  
   const user = await User.findOne({ phone });
   
   if (!user) {
-    return next(new CoffeeError('User not found', 404));
+    return res.json('User not found');
   }else{
     console.log(user);
   }
@@ -269,7 +238,7 @@ export const resetPassword = async (req: P['rq'], res: P['rs'], next: P['n']) =>
       console.log(newpassword)
     } else {
       // Handle the case when OTP verification fails
-      return next(new CoffeeError('OTP verification failed', 400));
+      return res.json('OTP verification failed');
     }
   } catch (error) {
     res.status(500).json(error);

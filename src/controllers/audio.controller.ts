@@ -472,36 +472,92 @@ export const getallplaylist = async (req, res) => {
   }
 };
 
+
+// export const follower = async (req, res) => {
+//   try {
+//     const { userId, artistId } = req.body;
+
+//     // Find the existing artist and user by their IDs
+//     const existingArtist = await Artist.findById(artistId);
+//     const existingUser = await User.findById(userId);
+
+//     if (!existingUser) {
+//       return res.status(404).json({ message: "No User Found" });
+//     }
+//     if (!existingArtist) {
+//       return res.status(404).json({ message: "No Artist Found" });
+//     }
+
+//     if (existingArtist.followers.includes(userId)) {
+//       // If the user is already a follower, consider this an "unfollow" action
+//       existingArtist.followers = existingArtist.followers.filter(followerId => followerId.toString() !== userId);
+
+//       // Save the modified artist to update the followers list
+//       await existingArtist.save();
+
+//       return res.status(200).json({ message: "Unfollowed" });
+//     } else {
+//       // User is not a follower, so add them to the followers array
+//       existingArtist.followers.push(userId);
+
+//       // Save the modified artist to add the follower
+//       await existingArtist.save();
+
+//       return res.status(200).json({ message: "Followed" });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
+
 export const follower = async (req, res) => {
   try {
-    const { userId, artistId } = req.body;
+    const { artistId, userId } = req.body;
+    const userExists = await User.exists({ _id: userId }); // Check if the user exists
 
-    const existingArtist = await Artist.findById(artistId);
-    const existingUser = await User.findById(userId); //print username not userId
+    if (!userExists) {
+      return res.status(401).json({ message: "Please register." });
+    }
 
-    if (!existingUser) {
-      res.status(404).json("No User Found");
-      return;
-    }
-    if (!existingArtist) {
-      res.status(200).json("No Artist");
-      return;
-    }
-    if (existingArtist.followers.includes(userId)) {
-      res.status(200).json("Already following");
-      return;
-    }
-    // existingArtist.followers.push(userId);
-    await existingArtist.save();
+    // Check if the artist record already exists
+    const existing = await Artist.findOne({ artistId });
 
-    res.status(200).json("Followed");
+    if (existing) {
+      const isFollowing = existing.userId.includes(userId);
+
+      if (isFollowing) {
+        existing.userId = existing.userId.filter(id => id.toString() !== userId);
+        existing.follow -= 1;
+        await existing.save();
+        res.status(200).json({ message: "Unfollowed artist." });
+      } else {
+        existing.userId.push(userId);
+        existing.follow += 1;
+        await existing.save();
+        res.status(200).json({ message: "Followed artist." });
+      }
+    } else {
+      const newArtist = new Artist({
+        artistId,
+        userId: [userId], // Store the user as a follower
+        follow: 1, // Initialize the follow count to 1
+      });
+
+      await newArtist.save();
+      res.status(200).json({ message: "Followed artist." });
+    }
   } catch (error) {
-    res.status(500).json({ error: "Error" });
+    console.error("Error toggling the artist status:", error);
+  res.status(500).json({ error: "Error toggling the artist status." });
   }
 };
 
-//Artist by name
 
+
+
+
+//Artist by name
 export const artistSongs = async (req, res) => {
   try {
     const artistName = req.params.artist.toLowerCase().trim(); // Normalize input artist name

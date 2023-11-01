@@ -2,6 +2,13 @@ import Admin from "@/models/admin.model";
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 const secretKey = "secretkey";
+import secrets from "@/config/secrets";
+
+type P = {
+  rq: Request;
+  rs: Response;
+  n: NextFunction;
+};
 
 export const getAllAdmin = async (req: Request, res: Response) => {
   try {
@@ -80,9 +87,24 @@ export const Admin_signIn = async (
   } else {
     const token = jwt.sign({ admin }, secretKey);
     res.status(200).json({ token, admin });
-
-    // const token = jwt.sign({ userId: user._id }, 'your-secret-key', { expiresIn: '1h' });
-    // res.status(200).json("success")
   }
+};
+
+
+/**
+ * Log Out artist
+ * @param req
+ * @param res
+ * @param next
+ */
+export const logOut = async (req: P["rq"], res: P["rs"], next: P["n"]) => {
+  res.cookie(secrets.token, null, {
+    expires: new Date(Date.now()),
+    httpOnly: true,
+  });
+  res.status(200).json({
+    success: true,
+    message: "Logout admin Successfully",
+  });
 };
 
