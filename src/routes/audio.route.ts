@@ -3,7 +3,7 @@ import express from "express";
 import { success, songByName, songByWord, songByNamePlay, getAllSongsPlay, artistSongs,  categorySongs} from "@/controllers/audio.controller";
 import {
     randomsongs, getrecentlyplayedsongs, playSong, songByIDPlay, likesongs, fav, favPlayed, addplaylist,
-    follower, getallplaylist, Trendingsongs, lyricById, searchSongs
+    follower, getallplaylist, Trendingsongs, lyricById, searchSongs, updatelike
 } from "@/controllers/audio.controller";
 import { audio } from "@/models/audio.model"
 const router = express.Router();
@@ -19,6 +19,8 @@ router.get('/random', randomsongs)
 router.get('/trendingsongs', Trendingsongs) //3)get completed
 
 router.put('/like', likesongs)
+
+router.put('/likecount/:id', updatelike)
 
 router.post('/playsong', playSong)
 

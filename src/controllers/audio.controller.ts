@@ -246,6 +246,58 @@ export const getAllSongsPlay = async (req, res) => {
   }
 };
 
+// export const likesongs = async (req, res) => {
+//   try {
+//     const { songId, userId } = req.body;
+
+//     console.log(songId)
+//     // Check if the user with the provided userId exists in your database
+//     const userExists = await User.exists({ _id: userId });
+
+//     if (!userExists) {
+//       return res
+//         .status(401)
+//         .json({ message: "Please register to like a song." });
+//     }
+
+//     // Find the Like document for the given songId
+//     const existing = await Like.findOne({ songId });
+//     const song = Audio.findById({_id:songId})
+//     console.log(song)
+//     if (existing) {
+//       // Check if the user has already liked the song
+//       const userIndex = existing.userId.indexOf(userId);
+
+//       if (userIndex !== -1) {
+//         // Remove the userId from the existing document's userId array
+//         existing.userId.splice(userIndex, 1);
+//         existing.likes -= 1;
+//         await existing.save();
+//         res.status(200).json({ message: "Unliked song." });
+//       } else {
+//         // Add the userId to the existing document's userId array
+//         existing.userId.push(userId);
+//         existing.likes += 1;
+//         await existing.save();
+//         res.status(200).json({ message: "Liked song." });
+//       }
+//     } else {
+//       // Create a new Like document for the song and add the user's userId
+//       const song = Audio.findById({_id:songId})
+//       console.log(song)
+//       const newSong = new Like({
+//         userId: [userId], // Create an array with the user's userId
+//         song,
+//       });
+//       await newSong.save();
+//       console.log(newSong)
+//       res.status(200).json({ message: "Liked song." });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ error: "Error toggling the like status." });
+//   }
+// };
+
 export const likesongs = async (req, res) => {
   try {
     const { songId, userId } = req.body;
@@ -254,38 +306,56 @@ export const likesongs = async (req, res) => {
     const userExists = await User.exists({ _id: userId });
 
     if (!userExists) {
-      return res
-        .status(401)
-        .json({ message: "Please register to like a song." });
+      return res.status(401).json({ message: "Please register to like a song." });
     }
 
     // Find the Like document for the given songId
-    const existing = await Like.findOne({ songId });
+    const existingLike = await Like.findOne({ songId });
 
-    if (existing) {
+
+    if (existingLike) {
       // Check if the user has already liked the song
-      const userIndex = existing.userId.indexOf(userId);
+      const userIndex = existingLike.userId.indexOf(userId);
 
       if (userIndex !== -1) {
         // Remove the userId from the existing document's userId array
-        existing.userId.splice(userIndex, 1);
-        existing.likes -= 1;
-        await existing.save();
+        existingLike.userId.splice(userIndex, 1);
+        existingLike.likes -= 1;
+        await existingLike.save();
         res.status(200).json({ message: "Unliked song." });
       } else {
         // Add the userId to the existing document's userId array
-        existing.userId.push(userId);
-        existing.likes += 1;
-        await existing.save();
+        existingLike.userId.push(userId);
+        existingLike.likes += 1;
+        await existingLike.save();
         res.status(200).json({ message: "Liked song." });
       }
     } else {
+      // Fetch the song object from the database
+     
+
+      // if (!song) {
+      //   return res.status(404).json({ message: "Song not found." });
+      // }
+
       // Create a new Like document for the song and add the user's userId
-      const newSong = new Like({
-        userId: [userId], // Create an array with the user's userId
-        songId,
+      const new_song = await Audio.findById(songId);
+      console.log(new_song)
+      const newLike = new Like({
+        userId: [userId],
+        new_song
+        // songId: song._id, // Store the songId
+        // songname: song.songname, // Store song details
+        // title: song.title,
+        // artist: song.artist,
+        // language: song.language,
+        // category: song.category,
+        // file: song.file,
+        // image: song.image,
+        // lyrics: song.lyrics,
       });
-      await newSong.save();
+      console.log(newLike)
+      await newLike.save();
       res.status(200).json({ message: "Liked song." });
     }
   } catch (error) {
@@ -293,21 +363,49 @@ export const likesongs = async (req, res) => {
   }
 };
 
+
+
+
 //Trending songs
 export const Trendingsongs = async (req, res) => {
   try {
-    const trendingSongs = await Like.find({ likes: { $gt: 2 } });
-
-    // Use the map function to extract songIds and create song links
-    const songLinks = trendingSongs.map((song) => {
-      return `http://localhost:8080/songsplay/${song.songId}`;
-    });
-
-    res.status(200).json(songLinks);
+    // const trendingSongs = await Like.find({ likes: { $gt: 2 } });
+    const trendingSongs = await Like.find({}).sort({ likes: -1 }).exec();
+    const newSongs = trendingSongs.map((song) => song.new_song);
+    console.log(newSongs);
+    res.status(200).json(newSongs);
   } catch (error) {
     res.status(500).json({ error: "Error logging the song." });
   }
 };
+
+export const updatelike = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { likes } = req.body;
+
+    // Validate if 'likes' is a number and 'id' is a valid ObjectId
+    if (isNaN(likes) || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid input data." });
+    }
+
+    const updatedLike = await Like.findByIdAndUpdate(
+      id,
+      { likes },
+      { new: true }
+    );
+
+    if (!updatedLike) {
+      return res.status(404).json({ error: "Like document not found." });
+    }
+
+    res.status(200).json(updatedLike);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error updating likes." });
+  }
+};
+
 
 export const songByNamePlay = async (req, res) => {
   try {

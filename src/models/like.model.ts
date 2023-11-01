@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const likeSchema = new mongoose.Schema({
     userId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
     songId: { type: mongoose.Schema.Types.ObjectId, ref: 'audio' }, 
+    new_song: {type:Object},
     likes: 
       {
        type: Number,
