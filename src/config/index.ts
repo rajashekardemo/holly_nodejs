@@ -5,6 +5,7 @@ config({ path: `.env.${dev ? 'development' : process.env.NODE_ENV}` });
 export const CREDENTIALS = process.env.CREDENTIALS === 'true';
 export const {
   AudioUrlBase,
+  VideoUrlBase,
   NODE_ENV,
   PORT,
   SECRET_KEY,

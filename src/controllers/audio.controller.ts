@@ -8,7 +8,7 @@ import Fav from "@/models/fav.model";
 import Playlist from "@/models/playlist.model";
 import User from "@/models/users/user.model";
 import Artist from "@/models/users/artist.model";
-import { response } from "express";
+
 
 export const success = async (req, res) => {
   const { songname, title, artist, language, category, lyrics } = req.body;
@@ -52,26 +52,6 @@ export const songByIDPlay = async (req, res) => {
     res.status(500).json({ error: "An error occurred while fetching songs." });
   }
 };
-
-// Getting Random 5 Songs
-// export const randomsongs = async (req, res) => {
-//   try {
-//     const songs = await bucket.find({}).toArray();
-//     const random = getRandomItems(songs, 5);
-//     console.log(random);
-//     res.status(200).json(random);
-//   } catch (error) {
-//     res.status(500).json({ error: "An error occurred while fetching songs." });
-//   }
-// };
-// function getRandomItems(array, count) {
-//   const shuffled = array.slice();
-//   for (let i = shuffled.length - 1; i > 0; i--) {
-//     const j = Math.floor(Math.random() * (i + 1));
-//     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-//   }
-//   return shuffled.slice(0, count);
-// }
 
 export const randomsongs = async (req, res) => {
   try {
@@ -189,17 +169,17 @@ export const songByName = async (req, res) => {
   }
 };
 
-// export const getAllSongsPlay = async (req, res) => {
-//   try {
-//     const songs = await Audio.find({});
-//     res.status(200).json(songs)
-//   } catch (error) {
-//     console.error(error);
-//     res
-//       .status(500)
-//       .json({ error: "An error occurred while fetching the songs." });
-//   }
-// };
+export const getAllSongsPlay = async (req, res) => {
+  try {
+    const songs = await Audio.find({});
+    res.status(200).json(songs)
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching the songs." });
+  }
+};
 
 // export const getAllSongsPlay = async (req, res) => {
 //   try {
@@ -220,99 +200,17 @@ export const songByName = async (req, res) => {
 //   }
 // };
 
-export const getAllSongsPlay = async (req, res) => {
-  try {
-    const perPage = 1; // Number of songs per page
-    const page = parseInt(req.query.page, 3) || 1; // Current page, default to 1
-
-    // Query the database to retrieve all songs
-    const allSongs = await Audio.find({});
-
-    // Calculate the total number of pages based on the number of songs and songs per page
-    const totalPages = Math.ceil(allSongs.length / perPage);
-
-    // Calculate the number of items to skip based on the current page
-    const skip = (page - 1) * perPage;
-
-    // Query the database to retrieve a limited number of songs for the current page
-    const songs = allSongs.slice(skip, skip + perPage);
-
-    res.status(200).json({ songs, totalPages, currentPage: page });
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching the songs." });
-  }
-};
-
-// export const likesongs = async (req, res) => {
-//   try {
-//     const { songId, userId } = req.body;
-
-//     console.log(songId)
-//     // Check if the user with the provided userId exists in your database
-//     const userExists = await User.exists({ _id: userId });
-
-//     if (!userExists) {
-//       return res
-//         .status(401)
-//         .json({ message: "Please register to like a song." });
-//     }
-
-//     // Find the Like document for the given songId
-//     const existing = await Like.findOne({ songId });
-//     const song = Audio.findById({_id:songId})
-//     console.log(song)
-//     if (existing) {
-//       // Check if the user has already liked the song
-//       const userIndex = existing.userId.indexOf(userId);
-
-//       if (userIndex !== -1) {
-//         // Remove the userId from the existing document's userId array
-//         existing.userId.splice(userIndex, 1);
-//         existing.likes -= 1;
-//         await existing.save();
-//         res.status(200).json({ message: "Unliked song." });
-//       } else {
-//         // Add the userId to the existing document's userId array
-//         existing.userId.push(userId);
-//         existing.likes += 1;
-//         await existing.save();
-//         res.status(200).json({ message: "Liked song." });
-//       }
-//     } else {
-//       // Create a new Like document for the song and add the user's userId
-//       const song = Audio.findById({_id:songId})
-//       console.log(song)
-//       const newSong = new Like({
-//         userId: [userId], // Create an array with the user's userId
-//         song,
-//       });
-//       await newSong.save();
-//       console.log(newSong)
-//       res.status(200).json({ message: "Liked song." });
-//     }
-//   } catch (error) {
-//     res.status(500).json({ error: "Error toggling the like status." });
-//   }
-// };
 
 export const likesongs = async (req, res) => {
   try {
     const { songId, userId } = req.body;
-
     // Check if the user with the provided userId exists in your database
     const userExists = await User.exists({ _id: userId });
-
     if (!userExists) {
       return res.status(401).json({ message: "Please register to like a song." });
     }
-
     // Find the Like document for the given songId
     const existingLike = await Like.findOne({ songId });
-
-
     if (existingLike) {
       // Check if the user has already liked the song
       const userIndex = existingLike.userId.indexOf(userId);
@@ -331,28 +229,13 @@ export const likesongs = async (req, res) => {
         res.status(200).json({ message: "Liked song." });
       }
     } else {
-      // Fetch the song object from the database
-     
-
-      // if (!song) {
-      //   return res.status(404).json({ message: "Song not found." });
-      // }
-
       // Create a new Like document for the song and add the user's userId
       const new_song = await Audio.findById(songId);
       console.log(new_song)
       const newLike = new Like({
         userId: [userId],
-        new_song
-        // songId: song._id, // Store the songId
-        // songname: song.songname, // Store song details
-        // title: song.title,
-        // artist: song.artist,
-        // language: song.language,
-        // category: song.category,
-        // file: song.file,
-        // image: song.image,
-        // lyrics: song.lyrics,
+        new_song,
+        songId: [songId]
       });
       console.log(newLike)
       await newLike.save();
@@ -381,24 +264,14 @@ export const Trendingsongs = async (req, res) => {
 
 export const updatelike = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { likes } = req.body;
-
-    // Validate if 'likes' is a number and 'id' is a valid ObjectId
-    if (isNaN(likes) || !mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid input data." });
-    }
-
-    const updatedLike = await Like.findByIdAndUpdate(
-      id,
-      { likes },
+    const { songId,likes } = req.body;
+    const updatedLike = await Like.findOneAndUpdate(
+      { songId: songId },
+      { $set: { likes: likes } },
       { new: true }
     );
-
-    if (!updatedLike) {
-      return res.status(404).json({ error: "Like document not found." });
-    }
-
+    
+    console.log(updatedLike); 
     res.status(200).json(updatedLike);
   } catch (error) {
     console.error(error);
@@ -569,90 +442,6 @@ export const getallplaylist = async (req, res) => {
     res.status(500).json({ error: "Error getting playlists with links" });
   }
 };
-
-
-// export const follower = async (req, res) => {
-//   try {
-//     const { userId, artistId } = req.body;
-
-//     // Find the existing artist and user by their IDs
-//     const existingArtist = await Artist.findById(artistId);
-//     const existingUser = await User.findById(userId);
-
-//     if (!existingUser) {
-//       return res.status(404).json({ message: "No User Found" });
-//     }
-//     if (!existingArtist) {
-//       return res.status(404).json({ message: "No Artist Found" });
-//     }
-
-//     if (existingArtist.followers.includes(userId)) {
-//       // If the user is already a follower, consider this an "unfollow" action
-//       existingArtist.followers = existingArtist.followers.filter(followerId => followerId.toString() !== userId);
-
-//       // Save the modified artist to update the followers list
-//       await existingArtist.save();
-
-//       return res.status(200).json({ message: "Unfollowed" });
-//     } else {
-//       // User is not a follower, so add them to the followers array
-//       existingArtist.followers.push(userId);
-
-//       // Save the modified artist to add the follower
-//       await existingArtist.save();
-
-//       return res.status(200).json({ message: "Followed" });
-//     }
-//   } catch (error) {
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// };
-
-
-export const follower = async (req, res) => {
-  try {
-    const { artistId, userId } = req.body;
-    const userExists = await User.exists({ _id: userId }); // Check if the user exists
-
-    if (!userExists) {
-      return res.status(401).json({ message: "Please register." });
-    }
-
-    // Check if the artist record already exists
-    const existing = await Artist.findOne({ artistId });
-
-    if (existing) {
-      const isFollowing = existing.userId.includes(userId);
-
-      if (isFollowing) {
-        existing.userId = existing.userId.filter(id => id.toString() !== userId);
-        existing.follow -= 1;
-        await existing.save();
-        res.status(200).json({ message: "Unfollowed artist." });
-      } else {
-        existing.userId.push(userId);
-        existing.follow += 1;
-        await existing.save();
-        res.status(200).json({ message: "Followed artist." });
-      }
-    } else {
-      const newArtist = new Artist({
-        artistId,
-        userId: [userId], // Store the user as a follower
-        follow: 1, // Initialize the follow count to 1
-      });
-
-      await newArtist.save();
-      res.status(200).json({ message: "Followed artist." });
-    }
-  } catch (error) {
-    console.error("Error toggling the artist status:", error);
-  res.status(500).json({ error: "Error toggling the artist status." });
-  }
-};
-
-
-
 
 
 //Artist by name

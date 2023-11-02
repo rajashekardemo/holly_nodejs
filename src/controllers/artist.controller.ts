@@ -6,6 +6,7 @@ import cookieToken from "@/utils/cookie-token";
 import toIND from "@/utils/to-ind";
 import { NextFunction, Request, Response } from "express";
 import Play from "@/models/play.model";
+import User from "@/models/users/user.model";
 
 
 type P = {
@@ -227,5 +228,77 @@ export const resetPassword = async (
     } 
   } catch (error) {
     res.status(500).json("error");
+  }
+};
+
+// export const follower = async (req, res) => {
+//   try {
+//     const { artistId, userId } = req.body;
+//     // Check if the user with the provided userId exists in your database
+//     const userExists = await User.exists({ _id: userId });
+//     if (!userExists) {
+//       return res.status(401).json({ message: "Please register to follow the artist." });
+//     }
+
+//     const existingFollow = await Artist.findOne({ artistId });
+//     if (existingFollow) {
+//       // Check if the user has already liked the song
+//       const userIndex = existingFollow.followers.indexOf(userId);
+
+//       if (userIndex !== -1) {
+//         // Remove the userId from the existing document's userId array
+//         existingFollow.followers.splice(userIndex, 1);
+//         existingFollow.followercount -= 1;
+//         await existingFollow.save();
+//         res.status(200).json({ message: "UnFollowed song." });
+//       } else {
+//         // Add the userId to the existing document's userId array
+//         existingFollow.followers.push(userId);
+//         existingFollow.followercount += 1;
+//         await existingFollow.save();
+//         res.status(200).json({ message: "Followed song." });
+//       }
+//     }
+//   } catch (error) {
+//     res.status(500).json({ error: "Error toggling the Follow status." });
+//   }
+// };
+
+
+
+export const follower = async (req, res) => {
+  try {
+    const { artistId, userId } = req.body;
+
+    // Check if the user with the provided userId exists in your database
+    const userExists = await User.exists({ _id: userId });
+    if (!userExists) {
+      return res.status(401).json({ message: "Please register to follow the artist." });
+    }
+
+    // Find the artist based on artistId
+    const existingArtist = await Artist.findById(artistId);
+
+    if (!existingArtist) {
+      return res.status(404).json({ message: "Artist not found." });
+    }
+
+    // Check if the user is already following the artist
+    if (existingArtist.followers.includes(userId)) {
+      // User is already following, so unfollow
+      existingArtist.followers.pull(userId);
+      existingArtist.followercount -= 1;
+      await existingArtist.save();
+      res.status(200).json({ message: "Unfollowed artist." });
+    } else {
+      // User is not following, so follow
+      existingArtist.followers.push(userId);
+      existingArtist.followercount += 1;
+      await existingArtist.save();
+      res.status(200).json({ message: "Followed artist." });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error toggling the follow status." });
   }
 };

@@ -31,6 +31,6 @@ router.post('/artist/reset-password', artist.resetPassword);
 router.post('/artist/logout', artist.logOut);
 
 
-
+router.put('/follower', artist.follower)
 
 export default router;

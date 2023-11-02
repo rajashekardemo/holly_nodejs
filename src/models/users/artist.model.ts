@@ -196,6 +196,7 @@ type ArtistDocument = {
   role: 'ADMIN' | 'USER' | 'ARTIST';
   status: string;
   followers : String;
+  followercount: Number;
   avatar: {
     type: string;
     id: string;
@@ -250,11 +251,13 @@ export const artistSchema = new Schema<ArtistDocument>({
     previewUrl: { type: String },
   },
   followers: [{ 
-    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'user' // Assuming users are stored in a 'User' collection
-    }
   }],
+  followercount: {
+   type: Number,
+   default:0,
+  },
   forgetPasswordToken: {
     type: String,
   },

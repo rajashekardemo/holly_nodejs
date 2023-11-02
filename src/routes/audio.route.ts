@@ -3,7 +3,7 @@ import express from "express";
 import { success, songByName, songByWord, songByNamePlay, getAllSongsPlay, artistSongs,  categorySongs} from "@/controllers/audio.controller";
 import {
     randomsongs, getrecentlyplayedsongs, playSong, songByIDPlay, likesongs, fav, favPlayed, addplaylist,
-    follower, getallplaylist, Trendingsongs, lyricById, searchSongs, updatelike
+     getallplaylist, Trendingsongs, lyricById, searchSongs, updatelike
 } from "@/controllers/audio.controller";
 import { audio } from "@/models/audio.model"
 const router = express.Router();
@@ -16,11 +16,11 @@ router.post("/audioupload", [uploadaudio.fields([{ name: 'file', maxCount: 1 }, 
 
 router.get('/random', randomsongs)
 
-router.get('/trendingsongs', Trendingsongs) //3)get completed
+router.get('/trendingsongs', Trendingsongs) 
 
 router.put('/like', likesongs)
 
-router.put('/likecount/:id', updatelike)
+router.put('/likecount', updatelike)
 
 router.post('/playsong', playSong)
 
@@ -46,7 +46,7 @@ router.post('/playlist', addplaylist)
 
 router.get('/playlists/:userId', getallplaylist)
 
-router.post('/follower', follower)
+
 
 router.get('/artistname/:artist',artistSongs)
 
@@ -55,7 +55,5 @@ router.get('/category/:category',categorySongs)
 
 
 router.get('/searchSongs/:search',searchSongs)
-
-
 
 export default router;

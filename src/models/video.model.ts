@@ -1,17 +1,26 @@
-import {videoBucket} from "@/databases/index"
 import mongoose from "mongoose";
+import {videoBucket} from "@/databases/index"
 
+const date = new Date();
+const currentYear = date.getFullYear();
+const currentMonth = date.getMonth() + 1;
+const currentDate = date.getDate();
+const currentMillis = date.getMilliseconds()+1;
 
+// Generate a 5-digit random number
+const randomNumber = Math.floor(Math.random() * 100000);
 
+// Combine all the values into a single string
+const randomValue = `${currentYear}-${currentMonth}-${currentDate}-${currentMillis}-${randomNumber}`;
+
+ 
 export const uploadVideo = async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No video file uploaded." });
       }
   
-      console.log("SUCCESS");
-  
-      const name = req.file?.originalname;
+      const name = randomValue+req.file?.originalname;
       const buffer = req.file?.buffer;
   
       if (!name?.match(/\.(mp4|avi|mkv|mov)$/i)) {
@@ -26,9 +35,7 @@ export const uploadVideo = async (req, res) => {
        
       const duration = Number(_a)
   
-      if(duration > 15 && duration < 50){
-  
-        console.log('DONE ')
+      if(duration > 15 && duration < 60){
       }else{
         res.status(500).send('Hey reduce the video duration')
       }
@@ -37,11 +44,11 @@ export const uploadVideo = async (req, res) => {
   
       writeStream.write(buffer);
       writeStream.end();
+
   
       writeStream.on("finish", async () => {
         const videoId = writeStream.id.toString();
-  
-        console.log(videoId);
+
         res.send({ ...req.body, ...req.file, buffer: undefined });
       });
     } catch (error) {
@@ -51,12 +58,10 @@ export const uploadVideo = async (req, res) => {
   };
 
 
-
   const videoSchema = new mongoose.Schema({
     title: String,
-    artist: String,
-    language: String,
-    category: String,
+    description: String,
+    videoUrl:String,
   });
   
   const video = mongoose.model('video', videoSchema); // 'Song' is the model name

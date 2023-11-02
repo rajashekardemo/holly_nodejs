@@ -5,7 +5,7 @@ import googleAuthRoutes from '@routes/auth/google.route';
 import facebookAuthRoutes from '@routes/auth/facebook.route';
 import audioRoutes from '@/routes/audio.route';
 import adminRoutes from '@/routes/admin.route';
-
+import videoRoutes from "@/routes/video.route"
 
 const routes = [
   {
@@ -27,6 +27,10 @@ const routes = [
 {
   path: '/admin',
   func: adminRoutes,
+},
+{
+  path: '/video',
+  func: videoRoutes,
 }
 
   // {

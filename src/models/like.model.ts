@@ -8,7 +8,8 @@ const likeSchema = new mongoose.Schema({
       {
        type: Number,
        default:1,
-      }
+      },
+
   });
   
   const Like = mongoose.model('like', likeSchema);
